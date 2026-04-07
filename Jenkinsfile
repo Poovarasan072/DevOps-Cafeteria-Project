@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_HUB_CREDENTIALS = credentials('docker-hub-cred') // Replace with your Jenkins Docker credentials ID
+        DOCKER_HUB_CREDENTIALS = credentials('dockerhub-cred') // Replace with your Jenkins Docker credentials ID
         DOCKER_IMAGE = 'poovarasans072/cafeteria-app:latest'
         K8S_YAML = 'k8s-deployment.yaml' // Ensure this file exists in your repo
     }
