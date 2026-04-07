@@ -2,12 +2,12 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "poovarasans072/cafeteria-app"
-        K8S_DEPLOYMENT_FILE = "k8s-deployment.yaml"
+        DOCKER_HUB_CREDENTIALS = credentials('docker-hub-cred') // Replace with your Jenkins Docker credentials ID
+        DOCKER_IMAGE = 'poovarasans072/cafeteria-app:latest'
+        K8S_YAML = 'k8s-deployment.yaml' // Ensure this file exists in your repo
     }
 
     stages {
-
         stage('Checkout Code') {
             steps {
                 checkout scm
@@ -16,46 +16,52 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                // Build Docker image locally
-                bat "docker build -t cafeteria-app ."
-            }
-        }
-
-        stage('Tag Docker Image') {
-            steps {
-                bat "docker tag cafeteria-app %IMAGE_NAME%:latest"
+                script {
+                    bat "docker build -t ${DOCKER_IMAGE} ."
+                }
             }
         }
 
         stage('Docker Hub Login') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-cred', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    bat 'docker login -u %DOCKER_USER% -p %DOCKER_PASS%'
+                script {
+                    bat "docker login -u ${DOCKER_HUB_CREDENTIALS_USR} -p ${DOCKER_HUB_CREDENTIALS_PSW}"
                 }
             }
         }
 
-        stage('Push Image to Docker Hub') {
+        stage('Push Docker Image') {
             steps {
-                bat "docker push %IMAGE_NAME%:latest"
+                script {
+                    bat "docker push ${DOCKER_IMAGE}"
+                }
             }
         }
 
         stage('Deploy to Kubernetes') {
             steps {
-                // Apply Kubernetes deployment YAML
-                bat "kubectl apply -f %K8S_DEPLOYMENT_FILE%"
+                script {
+                    // Check if YAML file exists before applying
+                    bat """
+                    if exist ${K8S_YAML} (
+                        kubectl apply -f ${K8S_YAML}
+                        kubectl rollout status deployment/cafeteria-deployment
+                    ) else (
+                        echo "Error: ${K8S_YAML} not found!"
+                        exit 1
+                    )
+                    """
+                }
             }
         }
-
     }
 
     post {
         success {
-            echo 'Pipeline completed successfully! Your app is running in Kubernetes.'
+            echo "Pipeline completed successfully!"
         }
         failure {
-            echo 'Pipeline failed. Check the console output for errors.'
+            echo "Pipeline failed. Check logs for details."
         }
     }
 }
