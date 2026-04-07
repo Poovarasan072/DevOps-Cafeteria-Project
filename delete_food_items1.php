@@ -18,7 +18,7 @@ $cheks = implode("','", $_POST['checkbox']);
 
 /* DISABLE SELECTED FOOD ITEMS */
 
-$sql = "UPDATE FOOD SET `options` = 'DISABLE' WHERE F_ID in ('$cheks')";
+$sql = "UPDATE food SET `options` = 'DISABLE' WHERE F_ID in ('$cheks')";
 
 $result = mysqli_query($conn,$sql) or die(mysqli_error($conn));
 
