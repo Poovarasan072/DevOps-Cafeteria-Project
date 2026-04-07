@@ -1,7 +1,17 @@
 pipeline {
     agent any
 
+    environment {
+        IMAGE_NAME = "poovarasans072/cafeteria-app"
+    }
+
     stages {
+
+        stage('Checkout Code') {
+            steps {
+                checkout scm
+            }
+        }
 
         stage('Build Docker Image') {
             steps {
@@ -9,15 +19,23 @@ pipeline {
             }
         }
 
-        stage('Tag Image') {
+        stage('Tag Docker Image') {
             steps {
-                bat 'docker tag cafeteria-app poovarasans072/cafeteria-app:latest'
+                bat 'docker tag cafeteria-app %IMAGE_NAME%:latest'
+            }
+        }
+
+        stage('Docker Hub Login') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-cred', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    bat 'docker login -u %DOCKER_USER% -p %DOCKER_PASS%'
+                }
             }
         }
 
         stage('Push Image to Docker Hub') {
             steps {
-                bat 'docker push poovarasans072/cafeteria-app:latest'
+                bat 'docker push %IMAGE_NAME%:latest'
             }
         }
 
@@ -28,5 +46,14 @@ pipeline {
             }
         }
 
+    }
+
+    post {
+        success {
+            echo 'Pipeline completed successfully!'
+        }
+        failure {
+            echo 'Pipeline failed. Check console output.'
+        }
     }
 }
