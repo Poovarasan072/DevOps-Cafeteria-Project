@@ -6,13 +6,14 @@ pipeline {
         DOCKER_IMAGE = 'poovarasans072/cafeteria-app:latest'
         // Kubernetes deployment YAML file
         K8S_YAML = 'k8s-deployment.yaml'
-        // Path to kubeconfig file on Jenkins server (adjust if needed)
+        // Path to kubeconfig file on Jenkins server
         KUBECONFIG_PATH = 'C:\\ProgramData\\Jenkins\\.jenkins\\workspace\\Cafeteria-Project\\.kube\\config'
     }
 
     stages {
         stage('Checkout Code') {
             steps {
+                echo "Checking out code from Git..."
                 checkout scm
             }
         }
@@ -26,13 +27,15 @@ pipeline {
             }
         }
 
-        stage('Push Docker Image') {
+        stage('Docker Hub Login & Push') {
             steps {
-                script {
-                    echo "Logging in and pushing Docker image..."
-                    // Use Jenkins Docker credentials safely
-                    withDockerRegistry([credentialsId: 'dockerhub-cred', url: '']) {
-                        bat "docker push ${DOCKER_IMAGE}"
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-cred', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    script {
+                        echo "Logging into Docker Hub..."
+                        bat """
+                        docker login -u %DOCKER_USER% -p %DOCKER_PASS%
+                        docker push ${DOCKER_IMAGE}
+                        """
                     }
                 }
             }
@@ -42,7 +45,6 @@ pipeline {
             steps {
                 script {
                     echo "Deploying to Kubernetes..."
-                    // Set KUBECONFIG to use your local kubeconfig file
                     bat """
                     set KUBECONFIG=${KUBECONFIG_PATH}
                     if exist ${K8S_YAML} (
