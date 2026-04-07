@@ -3,6 +3,7 @@ pipeline {
 
     environment {
         IMAGE_NAME = "poovarasans072/cafeteria-app"
+        K8S_DEPLOYMENT_FILE = "k8s-deployment.yaml"
     }
 
     stages {
@@ -15,13 +16,14 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                bat 'docker build -t cafeteria-app .'
+                // Build Docker image locally
+                bat "docker build -t cafeteria-app ."
             }
         }
 
         stage('Tag Docker Image') {
             steps {
-                bat 'docker tag cafeteria-app %IMAGE_NAME%:latest'
+                bat "docker tag cafeteria-app %IMAGE_NAME%:latest"
             }
         }
 
@@ -35,14 +37,14 @@ pipeline {
 
         stage('Push Image to Docker Hub') {
             steps {
-                bat 'docker push %IMAGE_NAME%:latest'
+                bat "docker push %IMAGE_NAME%:latest"
             }
         }
 
-        stage('Run Docker Containers') {
+        stage('Deploy to Kubernetes') {
             steps {
-                bat 'docker compose down'
-                bat 'docker compose up -d --build'
+                // Apply Kubernetes deployment YAML
+                bat "kubectl apply -f %K8S_DEPLOYMENT_FILE%"
             }
         }
 
@@ -50,10 +52,10 @@ pipeline {
 
     post {
         success {
-            echo 'Pipeline completed successfully!'
+            echo 'Pipeline completed successfully! Your app is running in Kubernetes.'
         }
         failure {
-            echo 'Pipeline failed. Check console output.'
+            echo 'Pipeline failed. Check the console output for errors.'
         }
     }
 }
