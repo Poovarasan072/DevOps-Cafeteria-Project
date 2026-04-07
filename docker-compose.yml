@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: foodorder_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: foodorder
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./foodordernew.sql:/docker-entrypoint-initdb.d/foodordernew.sql
+
+  web:
+    build: .
+    container_name: foodorder_web
+    ports:
+      - "8082:80"
+    depends_on:
+      - db
+
+volumes:
+  db_data:
