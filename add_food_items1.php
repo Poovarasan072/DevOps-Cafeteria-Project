@@ -16,7 +16,7 @@ $images_path = $conn->real_escape_string($_POST['images_path']);
 $user_check = $_SESSION['login_user1'];
 
 // Get Restaurant ID
-$R_IDsql = "SELECT R_ID FROM RESTAURANTS WHERE M_ID='$user_check'";
+$R_IDsql = "SELECT R_ID FROM restaurants WHERE M_ID='$user_check'";
 $R_IDresult = mysqli_query($conn,$R_IDsql);
 
 $R_ID = "";
