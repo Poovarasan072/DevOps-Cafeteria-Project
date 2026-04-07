@@ -2,8 +2,6 @@ pipeline {
     agent any
 
     environment {
-        // Jenkins credentials for Docker Hub
-        DOCKER_HUB_CREDENTIALS = credentials('dockerhub-cred') // Replace with your Jenkins Docker credentials ID
         // Docker image name
         DOCKER_IMAGE = 'poovarasans072/cafeteria-app:latest'
         // Kubernetes deployment YAML file
@@ -22,18 +20,8 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
+                    echo "Building Docker image: ${DOCKER_IMAGE}"
                     bat "docker build -t ${DOCKER_IMAGE} ."
-                }
-            }
-        }
-
-        stage('Docker Hub Login') {
-            steps {
-                script {
-                    // Login to Docker Hub using credentials
-                    bat """
-                    echo %DOCKER_HUB_CREDENTIALS_PSW% | docker login -u %DOCKER_HUB_CREDENTIALS_USR% --password-stdin
-                    """
                 }
             }
         }
@@ -41,7 +29,11 @@ pipeline {
         stage('Push Docker Image') {
             steps {
                 script {
-                    bat "docker push ${DOCKER_IMAGE}"
+                    echo "Logging in and pushing Docker image..."
+                    // Use Jenkins Docker credentials safely
+                    withDockerRegistry([credentialsId: 'dockerhub-cred', url: '']) {
+                        bat "docker push ${DOCKER_IMAGE}"
+                    }
                 }
             }
         }
@@ -49,15 +41,16 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 script {
-                    // Set KUBECONFIG and deploy
+                    echo "Deploying to Kubernetes..."
+                    // Set KUBECONFIG to use your local kubeconfig file
                     bat """
                     set KUBECONFIG=${KUBECONFIG_PATH}
                     if exist ${K8S_YAML} (
                         kubectl apply -f ${K8S_YAML}
                         kubectl rollout status deployment/cafeteria-deployment
-                        echo "Cafeteria app deployed successfully!"
+                        echo Cafeteria app deployed successfully!
                     ) else (
-                        echo "Error: ${K8S_YAML} not found!"
+                        echo Error: ${K8S_YAML} not found!
                         exit /b 1
                     )
                     """
