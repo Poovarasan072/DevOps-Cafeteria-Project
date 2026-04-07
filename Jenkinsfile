@@ -2,9 +2,14 @@ pipeline {
     agent any
 
     environment {
+        // Jenkins credentials for Docker Hub
         DOCKER_HUB_CREDENTIALS = credentials('dockerhub-cred') // Replace with your Jenkins Docker credentials ID
+        // Docker image name
         DOCKER_IMAGE = 'poovarasans072/cafeteria-app:latest'
-        K8S_YAML = 'k8s-deployment.yaml' // Ensure this file exists in your repo
+        // Kubernetes deployment YAML file
+        K8S_YAML = 'k8s-deployment.yaml'
+        // Path to kubeconfig file on Jenkins server (adjust if needed)
+        KUBECONFIG_PATH = 'C:\\ProgramData\\Jenkins\\.jenkins\\workspace\\Cafeteria-Project\\.kube\\config'
     }
 
     stages {
@@ -25,7 +30,10 @@ pipeline {
         stage('Docker Hub Login') {
             steps {
                 script {
-                    bat "docker login -u ${DOCKER_HUB_CREDENTIALS_USR} -p ${DOCKER_HUB_CREDENTIALS_PSW}"
+                    // Login to Docker Hub using credentials
+                    bat """
+                    echo %DOCKER_HUB_CREDENTIALS_PSW% | docker login -u %DOCKER_HUB_CREDENTIALS_USR% --password-stdin
+                    """
                 }
             }
         }
@@ -41,14 +49,16 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 script {
-                    // Check if YAML file exists before applying
+                    // Set KUBECONFIG and deploy
                     bat """
+                    set KUBECONFIG=${KUBECONFIG_PATH}
                     if exist ${K8S_YAML} (
                         kubectl apply -f ${K8S_YAML}
                         kubectl rollout status deployment/cafeteria-deployment
+                        echo "Cafeteria app deployed successfully!"
                     ) else (
                         echo "Error: ${K8S_YAML} not found!"
-                        exit 1
+                        exit /b 1
                     )
                     """
                 }

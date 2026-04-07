@@ -19,7 +19,6 @@ spec:
         image: poovarasans072/cafeteria-app:latest
         ports:
         - containerPort: 80
-        # Health checks to ensure pod is running correctly
         readinessProbe:
           httpGet:
             path: /
