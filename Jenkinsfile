@@ -3,12 +3,6 @@ pipeline {
 
     stages {
 
-        stage('Clone Repository') {
-            steps {
-                git 'https://github.com/Poovarasan072/DevOps-Cafeteria-Project.git'
-            }
-        }
-
         stage('Build Docker Image') {
             steps {
                 bat 'docker build -t cafeteria-app .'
