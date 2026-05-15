@@ -7,7 +7,7 @@ pipeline {
         // Kubernetes deployment YAML file
         K8S_YAML = 'k8s-deployment.yaml'
         // Path to kubeconfig file on Jenkins server
-        KUBECONFIG_PATH = 'C:\\ProgramData\\Jenkins\\.jenkins\\workspace\\Cafeteria-Project\\.kube\\config'
+        KUBECONFIG_PATH = 'C:\\Users\\Poovarasan S\\.kube\\config'
     }
 
     stages {
@@ -62,7 +62,7 @@ pipeline {
                         REM If deployment fails, Kubernetes restores
                         REM previous stable version automatically
                         REM ===================================================
-                        
+
                         if %ERRORLEVEL% NEQ 0 (
                             echo Deployment failed! Rolling back...
 
