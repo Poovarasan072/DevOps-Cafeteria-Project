@@ -45,13 +45,36 @@ pipeline {
             steps {
                 script {
                     echo "Deploying to Kubernetes..."
+
                     bat """
                     set KUBECONFIG=${KUBECONFIG_PATH}
+
                     if exist ${K8S_YAML} (
+
                         kubectl apply -f ${K8S_YAML}
-                        kubectl rollout status deployment/cafeteria-deployment
+
+                        echo Checking rollout status...
+
+                        kubectl rollout status deployment/cafeteria-deployment --timeout=60s
+
+                        REM ===================================================
+                        REM ROLLBACK FEATURE
+                        REM If deployment fails, Kubernetes restores
+                        REM previous stable version automatically
+                        REM ===================================================
+                        
+                        if %ERRORLEVEL% NEQ 0 (
+                            echo Deployment failed! Rolling back...
+
+                            kubectl rollout undo deployment/cafeteria-deployment
+
+                            exit /b 1
+                        )
+
                         echo Cafeteria app deployed successfully!
+
                     ) else (
+
                         echo Error: ${K8S_YAML} not found!
                         exit /b 1
                     )
