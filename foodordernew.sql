@@ -101,7 +101,7 @@ CREATE TABLE `food` (
   `options` varchar(10) NOT NULL DEFAULT 'ENABLE',
   `is_offer` tinyint(1) DEFAULT 0,
   `offer_price` int(11) DEFAULT NULL,
-  `offer_quantity` int(11) NOT NULL
+  `offer_quantity` int(11) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
