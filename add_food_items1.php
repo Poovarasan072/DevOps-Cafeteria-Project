@@ -28,7 +28,7 @@ if($R_IDresult && mysqli_num_rows($R_IDresult) > 0){
 
 // Insert Food Item
 $query = "INSERT INTO food(name,price,description,R_ID,images_path,offer_quantity) 
-VALUES('$name','$price','$description','$R_ID','$images_path','0')";
+VALUES('$name','$price','$description','$R_ID','$images_path',0)";
 
 $success = mysqli_query($conn,$query);
 
