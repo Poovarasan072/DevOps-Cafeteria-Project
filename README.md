@@ -20,8 +20,10 @@ By replacing the traditional manual system with an automated solution, the syste
 
 ## Manager Module
 - Add Food Items
+- Edit Food Items
+- Delete Food Items
 - Manage Orders
-- Enable/Disable Food Availability
+- Update Order Status
 - Offer Management
 
 ## Offer Management
