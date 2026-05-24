@@ -69,8 +69,8 @@ The deployment architecture follows a containerized DevOps workflow using Docker
 ## Step 1 — Clone Repository
 
 ```bash
-git clone https://github.com/your-username/your-repository.git
-cd your-repository
+git clone https://github.com/Poovarasan072/DevOps-Cafeteria-Project.git
+cd DevOps-Cafeteria-Project
 ```
 
 ---
